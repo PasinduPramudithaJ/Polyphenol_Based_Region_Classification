@@ -1,0 +1,11 @@
+Overall Test Accuracy: 100.00%
+
+                     precision    recall  f1-score   support
+
+     Dimbula Region       1.00      1.00      1.00         1
+      Ruhuna Region       1.00      1.00      1.00         1
+Sabaragamuwa Region       1.00      1.00      1.00         1
+
+           accuracy                           1.00         3
+          macro avg       1.00      1.00      1.00         3
+       weighted avg       1.00      1.00      1.00         3
