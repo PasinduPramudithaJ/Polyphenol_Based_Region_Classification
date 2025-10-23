@@ -18,7 +18,7 @@ models = {
 }
 
 # --------------------------
-# HTML template with Clear button
+# HTML template with styling
 # --------------------------
 HTML_TEMPLATE = """
 <!DOCTYPE html>
@@ -27,13 +27,15 @@ HTML_TEMPLATE = """
     <title>Tea Region Predictor</title>
     <style>
         body { font-family: Arial; background: #f0f5f5; text-align: center; padding-top: 40px; }
-        .box { background: white; padding: 30px; margin: auto; width: 700px; border-radius: 12px; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
+        .box { background: white; padding: 30px; margin: auto; width: 750px; border-radius: 12px; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
         input, select { width: 85%; padding: 10px; margin: 8px; border: 1px solid #ccc; border-radius: 5px; }
         button { background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
         button:hover { background-color: #45a049; }
         table { margin: 20px auto; border-collapse: collapse; width: 95%; }
         th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
         th { background-color: #f2f2f2; }
+        .match-ok { color: green; font-weight: bold; }
+        .match-error { color: red; font-weight: bold; }
         #spinner { display: none; margin: 20px auto; }
         .lds-dual-ring { display: inline-block; width: 64px; height: 64px; }
         .lds-dual-ring:after { content: " "; display: block; width: 46px; height: 46px; margin: 1px; border-radius: 50%; border: 5px solid #4CAF50; border-color: #4CAF50 transparent #4CAF50 transparent; animation: lds-dual-ring 1.2s linear infinite; }
@@ -58,7 +60,7 @@ HTML_TEMPLATE = """
             <input type="number" step="0.0001" name="absorbance" placeholder="Enter Absorbance"><br>
             <input type="number" step="0.0001" name="concentration" placeholder="Enter Concentration"><br>
             
-            <h4>OR Upload CSV (with columns: Sample Name, Absorbance, Concentration):</h4>
+            <h4>OR Upload CSV (with columns: Sample Name, Absorbance, Concentration [, Region]):</h4>
             <input type="file" name="csv_file" accept=".csv"><br>
             
             <select name="model_name" required>
@@ -125,7 +127,18 @@ def index():
                         features = df[["Absorbance", "Concentration"]]
                         preds = model.predict(features)
                         df["Predicted_Region"] = encoder.inverse_transform(preds)
-                        table = df.to_html(classes="table table-striped", index=False)
+
+                        # ✅ Add match column if actual Region exists
+                        if "Region" in df.columns:
+                            df["Match"] = df.apply(
+                                lambda row: '<span class="match-ok">✅</span>' if str(row["Region"]).strip().lower() == str(row["Predicted_Region"]).strip().lower()
+                                else '<span class="match-error">❌</span>',
+                                axis=1
+                            )
+                        else:
+                            df["Match"] = "N/A"
+
+                        table = df.to_html(classes="table table-striped", index=False, escape=False)
                 
                 # Single prediction
                 elif request.form.get("absorbance") and request.form.get("concentration"):

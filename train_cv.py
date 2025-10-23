@@ -40,7 +40,7 @@ print("🏷️ Classes:", list(class_names))
 # --------------------------
 # K-Fold Cross Validation Setup
 # --------------------------
-k = 5  # Number of folds (you can change this)
+k = 10  # Number of folds (you can change this)
 skf = StratifiedKFold(n_splits=k, shuffle=True, random_state=42)
 
 fold_accuracies = []

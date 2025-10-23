@@ -1,4 +1,4 @@
-Region ,Grade,Sample Name,Absorbance(765 nm) , Concentration (mg GAE / L)
+Region,Grade,Sample Name,Absorbance,Concentration
 Dimbula Region,BOP,DIM_BOP_001,0.264,27.6034483
 Dimbula Region,BOP,DIM_BOP_002,0.389,38.3793103
 Dimbula Region,BOP,DIM_BOP_003,0.448,43.4655172
