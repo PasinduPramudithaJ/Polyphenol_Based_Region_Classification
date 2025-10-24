@@ -1,8 +1,5 @@
 pandas
-numpy
-scikit-learn
 joblib
 flask
 gunicorn    # For deploying Flask app
-xgboost     # If you want to try a more powerful model alternative
-matplotlib  # For visualization (optional)
+

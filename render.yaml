@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: Polyphenol_Based_Region_Classification
+    runtime: python
+    plan: free
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: python app.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.14  
