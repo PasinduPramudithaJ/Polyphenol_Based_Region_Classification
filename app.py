@@ -11,7 +11,8 @@ from flask_cors import CORS
 # Initialize Flask App
 # ----------------------------------------------------------
 app = Flask(__name__)
-CORS(app)  # Allow CORS for all domains
+# ===== Enable CORS for all origins (supports HTTP & HTTPS) =====
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 # ----------------------------------------------------------
 # Load Models and Encoders
