@@ -1,14 +1,7 @@
-from flask import Flask, render_template_string, request, jsonify
-from flask_cors import CORS
+from flask import Flask, render_template_string, request
 import joblib
 import pandas as pd
 import os
-
-# --------------------------
-# Initialize Flask app
-# --------------------------
-app = Flask(__name__)
-CORS(app)  # ✅ Enable CORS for all routes (allows frontend to access it publicly)
 
 # --------------------------
 # Load models and encoders
@@ -25,7 +18,7 @@ models = {
 }
 
 # --------------------------
-# HTML template
+# HTML template with styling
 # --------------------------
 HTML_TEMPLATE = """
 <!DOCTYPE html>
@@ -81,6 +74,7 @@ HTML_TEMPLATE = """
             <button type="button" onclick="clearResults()">Clear</button>
         </form>
 
+        <!-- Loading Spinner -->
         <div id="spinner">
             <div class="lds-dual-ring"></div>
             <p>Processing...</p>
@@ -104,64 +98,54 @@ HTML_TEMPLATE = """
 """
 
 # --------------------------
-# Routes
+# Flask app
 # --------------------------
-@app.route("/", methods=["GET", "POST"])
-def index():
-    prediction = None
-    table = None
-    
-    if request.method == "POST":
-        try:
-            model_name = request.form["model_name"]
-            if model_name not in models:
-                prediction = "❌ Invalid model selected"
-            else:
-                model = models[model_name]["model"]
-                encoder = models[model_name]["encoder"]
-                
-                # CSV upload
-                if "csv_file" in request.files and request.files["csv_file"].filename != "":
-                    file = request.files["csv_file"]
-                    df = pd.read_csv(file)
-                    required_cols = {"Sample Name", "Absorbance", "Concentration"}
-                    if not required_cols.issubset(df.columns):
-                        prediction = "❌ CSV must contain columns: Sample Name, Absorbance, Concentration"
-                    else:
-                        features = df[["Absorbance", "Concentration"]]
-                        preds = model.predict(features)
-                        df["Predicted_Region"] = encoder.inverse_transform(preds)
+app = Flask(__name__)
 
-                        if "Region" in df.columns:
-                            df["Match"] = df.apply(
-                                lambda row: '<span class="match-ok">✅</span>' if str(row["Region"]).strip().lower() == str(row["Predicted_Region"]).strip().lower()
-                                else '<span class="match-error">❌</span>',
-                                axis=1
-                            )
-                        else:
-                            df["Match"] = "N/A"
+@app.route("/predict_polyphenol_region", methods=["POST"])
+def predict_polyphenol_region():
+    try:
+        # Receive JSON data from frontend
+        req_data = request.get_json()
+        data = req_data.get("data", [])
 
-                        table = df.to_html(classes="table table-striped", index=False, escape=False)
-                
-                # Single prediction
-                elif request.form.get("absorbance") and request.form.get("concentration"):
-                    absorbance = float(request.form["absorbance"])
-                    concentration = float(request.form["concentration"])
-                    features = pd.DataFrame([[absorbance, concentration]], columns=["Absorbance", "Concentration"])
-                    pred = model.predict(features)[0]
-                    prediction = encoder.inverse_transform([pred])[0]
-                
-                else:
-                    prediction = "❌ Please enter values or upload a CSV file"
-        except Exception as e:
-            prediction = f"Error: {e}"
-    
-    return render_template_string(HTML_TEMPLATE, prediction=prediction, table=table, models=models.keys())
+        if not data or not isinstance(data, list):
+            return jsonify({"error": "Invalid or empty data"}), 400
 
+        # Convert JSON list into DataFrame
+        df = pd.DataFrame(data)
 
+        # Ensure correct columns
+        if not {"Absorbance", "Concentration"}.issubset(df.columns):
+            return jsonify({"error": "Missing required fields"}), 400
+
+        # Run predictions
+        X = df[["Absorbance", "Concentration"]]
+        preds = model.predict(X)
+        probs = model.predict_proba(X)
+
+        # Map predictions back to labels
+        decoded_preds = encoder.inverse_transform(preds)
+
+        # Prepare response
+        results = []
+        for i, p in enumerate(decoded_preds):
+            conf = float(np.max(probs[i])) if len(probs.shape) > 1 else None
+            results.append({
+                "sample": f"Sample-{i+1}",
+                "prediction": str(p),
+                "confidence": round(conf, 4) if conf is not None else None,
+                "error": None
+            })
+
+        return jsonify(results)
+
+    except Exception as e:
+        print("Prediction error:", e)
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
 # --------------------------
-# Run Server (Render Ready)
+# Run server
 # --------------------------
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=5000, debug=False, threaded=True)
