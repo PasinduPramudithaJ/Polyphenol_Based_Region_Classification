@@ -1,7 +1,14 @@
-from flask import Flask, render_template_string, request
+from flask import Flask, render_template_string, request, jsonify
+from flask_cors import CORS
 import joblib
 import pandas as pd
 import os
+
+# --------------------------
+# Initialize Flask app
+# --------------------------
+app = Flask(__name__)
+CORS(app)  # ✅ Enable CORS for all routes (allows frontend to access it publicly)
 
 # --------------------------
 # Load models and encoders
@@ -18,7 +25,7 @@ models = {
 }
 
 # --------------------------
-# HTML template with styling
+# HTML template
 # --------------------------
 HTML_TEMPLATE = """
 <!DOCTYPE html>
@@ -74,7 +81,6 @@ HTML_TEMPLATE = """
             <button type="button" onclick="clearResults()">Clear</button>
         </form>
 
-        <!-- Loading Spinner -->
         <div id="spinner">
             <div class="lds-dual-ring"></div>
             <p>Processing...</p>
@@ -98,10 +104,8 @@ HTML_TEMPLATE = """
 """
 
 # --------------------------
-# Flask app
+# Routes
 # --------------------------
-app = Flask(__name__)
-
 @app.route("/", methods=["GET", "POST"])
 def index():
     prediction = None
@@ -116,7 +120,7 @@ def index():
                 model = models[model_name]["model"]
                 encoder = models[model_name]["encoder"]
                 
-                # Check CSV upload
+                # CSV upload
                 if "csv_file" in request.files and request.files["csv_file"].filename != "":
                     file = request.files["csv_file"]
                     df = pd.read_csv(file)
@@ -128,7 +132,6 @@ def index():
                         preds = model.predict(features)
                         df["Predicted_Region"] = encoder.inverse_transform(preds)
 
-                        # ✅ Add match column if actual Region exists
                         if "Region" in df.columns:
                             df["Match"] = df.apply(
                                 lambda row: '<span class="match-ok">✅</span>' if str(row["Region"]).strip().lower() == str(row["Predicted_Region"]).strip().lower()
@@ -155,8 +158,10 @@ def index():
     
     return render_template_string(HTML_TEMPLATE, prediction=prediction, table=table, models=models.keys())
 
+
 # --------------------------
-# Run server
+# Run Server (Render Ready)
 # --------------------------
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
