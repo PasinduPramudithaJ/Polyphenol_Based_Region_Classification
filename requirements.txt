@@ -2,4 +2,8 @@ pandas
 joblib
 flask
 gunicorn    # For deploying Flask app
-
+numpy
+matplotlib
+seaborn
+scikit-learn
+joblib
