@@ -49,9 +49,9 @@ print("Classes.txt:", class_names)
 # --------------------------
 # Prepare features and labels
 # --------------------------
-X_train = train[['Absorbance', 'Concentration']]
+X_train = train[['Absorbance', 'Concentration','Dry matter content','Caffiene Content']]
 y_train = train['Region'].astype(str)
-X_val = val[['Absorbance', 'Concentration']]
+X_val = val[['Absorbance', 'Concentration','Dry matter content','Caffiene Content']]
 y_val = val['Region'].astype(str)
 
 # --------------------------

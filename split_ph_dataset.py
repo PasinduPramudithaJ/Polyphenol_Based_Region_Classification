@@ -5,7 +5,7 @@ import os
 # ---------------------------
 # Load dataset
 # ---------------------------
-data = pd.read_csv("data/3_Region_Dataset.csv")
+data = pd.read_csv("data/Polyphenol_Primary_Dataset.csv")
 data.columns = data.columns.str.strip()  # remove spaces
 print("📊 Columns:", data.columns)
 

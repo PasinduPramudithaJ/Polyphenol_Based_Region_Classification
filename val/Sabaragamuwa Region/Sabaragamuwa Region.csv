@@ -1,4 +1,4 @@
-Region,Grade,Sample Name,Absorbance,Concentration
-Sabaragamuwa Region,BOPF,SB_BOPF_007,0.33,34.57272727
-Sabaragamuwa Region,BOPF,SB_BOPF_004,0.293,31.20909091
-Sabaragamuwa Region,BOPF,SB_BOPF_005,0.297,31.57272727
+Region,Grade,Sample Name,Absorbance,Concentration,Dry matter content,Caffiene Content
+Sabaragamuwa Region,BOPF,SB_BOPF_003,0.276,15.78,95.59,
+Sabaragamuwa Region,BOPF,SB_BOPF_008,0.359,19.97,95.12,
+Sabaragamuwa Region,BOPF,SB_BOPF_009,0.316,18.17,93.4,

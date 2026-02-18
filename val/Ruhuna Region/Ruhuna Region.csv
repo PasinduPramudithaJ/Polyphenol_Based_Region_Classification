@@ -1,4 +1,9 @@
-Region,Grade,Sample Name,Absorbance,Concentration
-Ruhuna Region,OP,RU_OP_003,0.373,37.0
-Ruhuna Region,OP,RU_OP_001,0.435,42.3448276
-Ruhuna Region,OP,RU_OP_009,0.415,40.6206897
+Region,Grade,Sample Name,Absorbance,Concentration,Dry matter content,Caffiene Content
+Ruhuna Region,DUST,Ru_Dust_001,0.387,21.68,93.73,519.52
+Ruhuna Region,BOPF,RU_BOPF_004,0.497,27.97,91.2,
+Ruhuna Region,OP,RU_OP_006,0.435,21.45,96.94,790.42
+Ruhuna Region,OP,RU_OP_003,0.3,17.1,94.81,915.06
+Ruhuna Region,OP,RU_OP_004,0.475,14.74,95.97,1050.5
+Ruhuna Region,OP,RU_OP_002,0.303,17.09,95.74,689.55
+Ruhuna Region,BOPF,RU_BOPF_001,0.319,20.3,84.32,
+Ruhuna Region,OP,RU_OP_001,0.367,20.1,96.4,783.21

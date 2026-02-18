@@ -1,4 +1,8 @@
-Region,Grade,Sample Name,Absorbance,Concentration
-Sabaragamuwa Region,BOPF,SB_BOPF_003,0.276,29.66363636
-Ruhuna Region,OP,RU_OP_010,0.331,33.3793103
-Dimbula Region,BOP,DIM_BOP_006,0.5415,51.5258621
+Region,Grade,Sample Name,Absorbance,Concentration,Dry matter content,Caffiene Content
+Ruhuna Region,OP,RU_OP_007,0.2425,13.83,97.67,723.42
+Dimbula Region,BOP,DIM_BOP_007,0.222,13.24,94.66,549.06
+Ruhuna Region,BOPF,RU_BOPF_003,0.47,26.72,90.71,
+Dimbula Region,DUST,DIM_DUST_002,0.234,14.32,91.32,701.08
+Sabaragamuwa Region,BOPF,SB_BOPF_010,0.348,19.33,95.59,
+Dimbula Region,BOPF,DIM_BOPF_008,0.323,19.4,89.17,
+Dimbula Region,BOP,DIM_BOP_004,0.357,19.78,95.57,600.22

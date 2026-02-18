@@ -12,7 +12,7 @@ import joblib
 # --------------------------
 # Load dataset
 # --------------------------
-data_path = "data/3_Region_Dataset.csv"
+data_path = "data/Polyphenol_Primary_Dataset.csv"
 if not os.path.exists(data_path):
     raise FileNotFoundError(f"Dataset not found at {data_path}")
 
@@ -28,7 +28,7 @@ print("📊 Columns:", list(data.columns))
 # --------------------------
 # Prepare features and labels
 # --------------------------
-X = data[["Absorbance", "Concentration"]]
+X = data[["Absorbance", "Concentration","Dry matter content","Caffiene Content"]]
 y = data["Region"].astype(str)
 
 # --------------------------
@@ -182,6 +182,6 @@ plt.show()
 # 🔟 Feature importance from last trained RandomForest
 plt.figure(figsize=(8,6))
 importances = model.feature_importances_
-sns.barplot(x=["Absorbance", "Concentration"], y=importances)
+sns.barplot(x=["Absorbance", "Concentration","Dry matter content","Caffiene Content"], y=importances)
 plt.title("Feature Importance (Last Fold)")
 plt.show()

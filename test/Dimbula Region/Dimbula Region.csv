@@ -1,2 +1,5 @@
-Region,Grade,Sample Name,Absorbance,Concentration
-Dimbula Region,BOP,DIM_BOP_006,0.5415,51.5258621
+Region,Grade,Sample Name,Absorbance,Concentration,Dry matter content,Caffiene Content
+Dimbula Region,DUST,DIM_DUST_002,0.234,14.32,91.32,701.08
+Dimbula Region,BOP,DIM_BOP_004,0.357,19.78,95.57,600.22
+Dimbula Region,BOP,DIM_BOP_007,0.222,13.24,94.66,549.06
+Dimbula Region,BOPF,DIM_BOPF_008,0.323,19.4,89.17,
