@@ -33,14 +33,14 @@ for region in os.listdir(test_base):
                     continue
                 
                 # Predict
-                X = df[['Absorbance', 'Concentration']]
+                X = df[['Absorbance', 'Concentration','Dry matter content','Caffiene Content']]
                 preds = model.predict(X)
                 df['Predicted_Region'] = encoder.inverse_transform(preds)
                 
                 # Add true region column
                 df['Actual_Region'] = region
                 
-                all_predictions.append(df[['Sample Name', 'Absorbance', 'Concentration', 'Actual_Region', 'Predicted_Region']])
+                all_predictions.append(df[['Sample Name', 'Absorbance', 'Concentration','Dry matter content','Caffiene Content', 'Actual_Region', 'Predicted_Region']])
                 
             except Exception as e:
                 print(f"⚠️ Failed {csv_file}: {e}")
