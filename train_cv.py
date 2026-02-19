@@ -12,7 +12,7 @@ import joblib
 # --------------------------
 # Load dataset
 # --------------------------
-data_path = "data/Polyphenol_Primary_Dataset.csv"
+data_path = "data/Polyphenol_Expanded_Dataset.csv"
 if not os.path.exists(data_path):
     raise FileNotFoundError(f"Dataset not found at {data_path}")
 
@@ -42,7 +42,7 @@ print("🏷️ Classes:", list(class_names))
 # --------------------------
 # K-Fold Cross Validation Setup
 # --------------------------
-k = 10  # Adjust folds
+k = 20  # Adjust folds
 skf = StratifiedKFold(n_splits=k, shuffle=True, random_state=42)
 
 fold_accuracies = []
