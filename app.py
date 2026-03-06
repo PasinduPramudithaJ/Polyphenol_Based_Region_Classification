@@ -1,5 +1,8 @@
-from flask import Flask, request, jsonify, render_template_string
+import time
+
+from flask import Flask, render_template, request, jsonify, render_template_string
 import joblib
+from matplotlib import pyplot as plt
 import pandas as pd
 import numpy as np
 import socket
@@ -53,6 +56,22 @@ HTML_TEMPLATE = """
         table { margin: 20px auto; border-collapse: collapse; width: 95%; }
         th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
         th { background-color: #f2f2f2; }
+        
+.nav-button {
+        background-color: #4CAF50;  /* green like Predict button */
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 5px;
+        transition: 0.3s;  /* smooth hover effect */
+    }
+
+.nav-button:hover {
+        background-color: #007BFF;  /* blue on hover */
+        color: white;               /* text stays white */
+    }
     </style>
 </head>
 <body>
@@ -78,6 +97,8 @@ HTML_TEMPLATE = """
             </select><br>
 
             <button type="submit">Predict</button>
+            <a href="/electro"><button type="button" class="nav-button">TPC Analyzer</button></a>
+            
         </form>
 
         {% if prediction %}
@@ -241,7 +262,175 @@ def predict_polyphenol_region():
     except Exception as e:
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
+    
 
+PLOT_FOLDER = os.path.join("static", "plots")
+os.makedirs(PLOT_FOLDER, exist_ok=True)
+
+@app.route("/electro", methods=["GET", "POST"])
+def index():
+
+    data = None
+    error = None
+
+    if request.method == "POST":
+
+        if "clear" in request.form:
+            return render_template("index.html")
+
+        try:
+
+            iv_file = request.files.get("iv_csv")
+            ic_file = request.files.get("ic_csv")
+
+            if not iv_file or not ic_file:
+                raise ValueError("Upload both CSV files.")
+
+            df_iv = pd.read_csv(iv_file)
+            df_ic = pd.read_csv(ic_file)
+
+            if 'V' not in df_iv.columns or 'I' not in df_iv.columns:
+                raise ValueError("I-V CSV must contain V and I columns")
+
+            if 'C' not in df_ic.columns or 'I' not in df_ic.columns:
+                raise ValueError("Calibration CSV must contain C and I columns")
+
+            # -------- TARGET VOLTAGES --------
+
+            V1_target = 0.4
+            V2_target = 0.5
+
+            idx1 = (df_iv["V"] - V1_target).abs().idxmin()
+            idx2 = (df_iv["V"] - V2_target).abs().idxmin()
+
+            V1 = df_iv.loc[idx1, "V"]
+            I1 = df_iv.loc[idx1, "I"]
+
+            V2 = df_iv.loc[idx2, "V"]
+            I2 = df_iv.loc[idx2, "I"]
+
+            # -------- PEAK --------
+
+            imax_index = df_iv["I"].idxmax()
+
+            Imax = df_iv.loc[imax_index, "I"]
+            Vmax = df_iv.loc[imax_index, "V"]
+
+            # -------- BASELINE --------
+
+            m1 = (I2 - I1) / (V2 - V1)
+            c1 = I1 - m1 * V1
+
+            # Baseline current at Vmax
+            Imax_prime = (m1 * Vmax) + c1
+
+            # Net peak current
+            I_net = Imax - Imax_prime
+
+            # -------- CALIBRATION --------
+
+            C_vals = df_ic["C"]
+            I_vals = df_ic["I"]
+
+            M, C_intercept = np.polyfit(C_vals, I_vals, 1)
+
+            TPC = (I_net - C_intercept) / M
+
+            # -------- UNIQUE FILE NAMES --------
+
+            timestamp = int(time.time())
+
+            iv_file_name = f"iv_plot_{timestamp}.png"
+            ic_file_name = f"ic_plot_{timestamp}.png"
+
+            iv_path = os.path.join(PLOT_FOLDER, iv_file_name)
+            ic_path = os.path.join(PLOT_FOLDER, ic_file_name)
+
+            # -------- PLOT 1 : I-V --------
+
+            plt.figure(figsize=(7,5))
+
+            plt.plot(df_iv["V"], df_iv["I"], label="Sample Curve")
+
+            plt.scatter([V1,V2,Vmax],[I1,I2,Imax])
+
+            plt.text(V1,I1,"  I1")
+            plt.text(V2,I2,"  I2")
+            plt.text(Vmax,Imax,"  Imax")
+
+            # baseline
+            x_base = np.linspace(V1,V2,50)
+            y_base = m1*x_base + c1
+
+            plt.plot(x_base,y_base,"--",label="Baseline")
+
+            # projected baseline current
+            plt.scatter(Vmax,Imax_prime)
+            plt.text(Vmax,Imax_prime,"  Imax'")
+
+            plt.xlabel("Voltage (V)")
+            plt.ylabel("Current (µA)")
+            plt.title("I-V Curve Analysis")
+
+            plt.legend()
+            plt.grid(True)
+
+            plt.savefig(iv_path)
+            plt.close()
+
+            # -------- PLOT 2 : CALIBRATION --------
+
+            plt.figure(figsize=(7,5))
+
+            plt.scatter(C_vals,I_vals,label="Standards")
+
+            x_line=np.linspace(min(C_vals),max(C_vals),100)
+            y_line=M*x_line+C_intercept
+
+            plt.plot(x_line,y_line,label="Linear Fit")
+
+            plt.xlabel("Concentration")
+            plt.ylabel("Current")
+            plt.title("Calibration Curve")
+
+            plt.legend()
+            plt.grid(True)
+
+            plt.savefig(ic_path)
+            plt.close()
+
+            # -------- SEND DATA --------
+
+            data = {
+
+                "V1":round(V1,4),
+                "V2":round(V2,4),
+
+                "I1":round(I1,6),
+                "I2":round(I2,6),
+
+                "Vmax":round(Vmax,6),
+                "Imax":round(Imax,6),
+
+                "m1":round(m1,6),
+                "c1":round(c1,6),
+
+                "Imax_prime":round(Imax_prime,6),
+                "I_net":round(I_net,6),
+
+                "M":round(M,6),
+                "C_intercept":round(C_intercept,6),
+
+                "TPC":round(TPC,4),
+
+                "iv_plot":f"static/plots/{iv_file_name}",
+                "ic_plot":f"static/plots/{ic_file_name}"
+            }
+
+        except Exception as e:
+            error = str(e)
+
+    return render_template("index.html",data=data,error=error)
 
 # ----------------------------------------------------------
 # Run Server

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+
+<title>Tea TPC Analyzer</title>
+
+<style>
+
+body{
+font-family:'Segoe UI',Arial;
+background:#eef5ee;
+text-align:center;
+color:#2e4a2e;
+margin:0;
+}
+
+.container{
+background:white;
+width:85%;
+max-width:1000px;
+margin:40px auto;
+padding:30px;
+border-radius:15px;
+box-shadow:0 4px 15px rgba(0,0,0,0.1);
+border-top:6px solid #4CAF50;
+}
+
+.file-input-group{
+display:flex;
+flex-wrap:wrap;
+justify-content:space-around;
+margin:25px 0;
+gap:20px;
+}
+
+.input-box{
+background:#f9f9f9;
+padding:15px;
+border-radius:8px;
+border:1px dashed #ccc;
+width:250px;
+}
+
+button{
+padding:12px 25px;
+margin:10px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+font-weight:bold;
+font-size:14px;
+}
+
+.btn-calc{
+background:#4CAF50;
+color:white;
+}
+
+.btn-clear{
+background:#f44336;
+color:white;
+}
+
+table{
+margin:20px auto;
+border-collapse:collapse;
+width:100%;
+max-width:600px;
+}
+
+td,th{
+padding:10px;
+border:1px solid #ddd;
+text-align:left;
+}
+
+th{
+background:#f4f4f4;
+}
+
+.tpc-result{
+background:#e8f5e9;
+font-size:1.1em;
+font-weight:bold;
+color:#2e7d32;
+}
+
+.error{
+color:#d32f2f;
+background:#ffeaed;
+padding:10px;
+border-radius:5px;
+margin:10px;
+}
+
+img{
+width:100%;
+max-width:450px;
+margin-top:15px;
+border:1px solid #eee;
+border-radius:8px;
+}
+
+.plot-container{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:30px;
+margin-top:30px;
+}
+
+.nav-button {
+        background-color: #4CAF50;  /* green like Predict button */
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 5px;
+        transition: 0.3s;  /* smooth hover effect */
+    }
+
+.nav-button:hover {
+        background-color: #007BFF;  /* blue on hover */
+        color: white;               /* text stays white */
+    }
+</style>
+
+</style>
+</head>
+
+
+<body>
+
+<div class="container">
+
+<h2>🍃 Tea Research — TPC Analyzer</h2>
+
+{% if error %}
+<div class="error">
+{{error}}
+</div>
+{% endif %}
+
+
+<form method="POST" enctype="multipart/form-data">
+
+<div class="file-input-group">
+
+<div class="input-box">
+<p><strong>I-V Sample Data (CSV)</strong></p>
+<input type="file" name="iv_csv" accept=".csv" required>
+</div>
+
+<div class="input-box">
+<p><strong>I-C Calibration Data (CSV)</strong></p>
+<input type="file" name="ic_csv" accept=".csv" required>
+</div>
+
+</div>
+
+<button type="submit" class="btn-calc">Analyze Sample</button>
+
+<button type="submit" name="clear" class="btn-clear" formnovalidate>
+Clear Results
+</button>
+<a href="/">
+    <button type="button" class="nav-button">Home</button>
+</a>
+
+</form>
+
+
+{% if data %}
+
+<hr>
+
+<h3>Calculated Variables</h3>
+
+<table>
+
+<tr>
+<th>Parameter</th>
+<th>Value</th>
+</tr>
+
+<tr>
+<td>Baseline Voltage 1 (V₁)</td>
+<td>{{data.V1}} V</td>
+</tr>
+
+<tr>
+<td>Baseline Current 1 (I₁)</td>
+<td>{{data.I1}} µA</td>
+</tr>
+
+<tr>
+<td>Baseline Voltage 2 (V₂)</td>
+<td>{{data.V2}} V</td>
+</tr>
+
+<tr>
+<td>Baseline Current 2 (I₂)</td>
+<td>{{data.I2}} µA</td>
+</tr>
+
+<tr>
+<td>Peak Voltage (Vmax)</td>
+<td>{{data.Vmax}} V</td>
+</tr>
+
+<tr>
+<td>Total Peak Current (Imax)</td>
+<td>{{data.Imax}} µA</td>
+</tr>
+
+<tr>
+<td>Baseline Slope (m₁)</td>
+<td>{{data.m1}}</td>
+</tr>
+
+<tr>
+<td>Baseline Intercept (c₁)</td>
+<td>{{data.c1}}</td>
+</tr>
+
+<tr>
+<td>Baseline Current at Vmax (I′max)</td>
+<td>{{data.Imax_prime}} µA</td>
+</tr>
+
+<tr class="tpc-result">
+<td>Net Peak Current (I)</td>
+<td>{{data.I_net}} µA</td>
+</tr>
+
+<tr>
+<td>Calibration Slope (M)</td>
+<td>{{data.M}}</td>
+</tr>
+
+<tr>
+<td>Calibration Intercept (C)</td>
+<td>{{data.C_intercept}}</td>
+</tr>
+
+<tr class="tpc-result">
+<td>Total Polyphenol Content (TPC)</td>
+<td>{{data.TPC}} mg/L</td>
+</tr>
+
+</table>
+
+
+<div class="plot-container">
+
+<div>
+<h4>I-V Voltammogram</h4>
+<img src="{{data.iv_plot}}" alt="IV Curve">
+</div>
+
+<div>
+<h4>Calibration Curve</h4>
+<img src="{{data.ic_plot}}" alt="Calibration Curve">
+</div>
+
+</div>
+
+{% endif %}
+
+</div>
+
+</body>
+</html>
