@@ -310,11 +310,11 @@ def index():
             I2 = df_iv.loc[idx2, "I"]
 
             # -------- PEAK --------
+            df_range = df_iv[(df_iv["V"] >= V1) & (df_iv["V"] <= V2)]
 
-            imax_index = df_iv["I"].idxmax()
-
-            Imax = df_iv.loc[imax_index, "I"]
-            Vmax = df_iv.loc[imax_index, "V"]
+            imax_index = df_range["I"].idxmax()
+            Imax = df_range.loc[imax_index, "I"]
+            Vmax = df_range.loc[imax_index, "V"]
 
             # -------- BASELINE --------
 
@@ -369,7 +369,7 @@ def index():
             plt.text(Vmax,Imax_prime,"  Imax'")
 
             plt.xlabel("Voltage (V)")
-            plt.ylabel("Current (µA)")
+            plt.ylabel("Current (A)")
             plt.title("I-V Curve Analysis")
 
             plt.legend()
@@ -421,7 +421,7 @@ def index():
                 "M":round(M,6),
                 "C_intercept":round(C_intercept,6),
 
-                "TPC":round(TPC,4),
+                "TPC":round(TPC,6),
 
                 "iv_plot":f"static/plots/{iv_file_name}",
                 "ic_plot":f"static/plots/{ic_file_name}"
